@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SecServer</class>
+ <widget class="QWidget" name="SecServer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1195</width>
+    <height>659</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SecServer</string>
+  </property>
+  <widget class="QTableWidget" name="tableWidget_ClientList">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>140</y>
+     <width>1041</width>
+     <height>271</height>
+    </rect>
+   </property>
+   <column>
+    <property name="text">
+     <string>IP地址</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>MAC地址</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>注册状态</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>连接状态</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>授权状态</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>操作</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTextEdit" name="textEdit">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>450</y>
+     <width>1041</width>
+     <height>171</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_OpenApproval">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>592</x>
+     <y>90</y>
+     <width>121</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>审核</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_Clients">
+   <property name="geometry">
+    <rect>
+     <x>50</x>
+     <y>100</y>
+     <width>171</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>终端列表</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_Refresh">
+   <property name="geometry">
+    <rect>
+     <x>410</x>
+     <y>90</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>刷新</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
