@@ -13,11 +13,30 @@ class FirewallRule : public QObject
 public:
     explicit FirewallRule(QObject *parent = nullptr);
 
-    void createRule(QString clientIP);
-    void enableRule(QString ruleName);
-    void disableRule(QString ruleName);
+    QString ruleName;
+    QString clientIP;
+    QString typeName;
+    QString args;
+
+    void createRule();
+    void enableRule();
+    void disableRule();
+    void deleteRule();
     QString execCmd(QString cmd, QString args);
     bool isRuleExist(QString ruleName);
+    void initRule();
+
+    QString getClientIP() const;
+    void setClientIP(const QString &value);
+
+    QString getRuleName() const;
+    void setRuleName(const QString &value);
+
+    QString getTypeName() const;
+    void setTypeName(const QString &value);
+
+    QString getArgs() const;
+    void setArgs(const QString &value);
 
 signals:
 

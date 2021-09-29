@@ -61,7 +61,7 @@ private slots:
     void setServerClosed();
     void OnReceive(QByteArray bytes);
     void validAuthorization();
-    void addNewClient(QTcpSocket *client);
+    void addNewClientConnection(QTcpSocket *client);
     void handleClientMessage(Client *c);
 };
 

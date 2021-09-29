@@ -25,11 +25,15 @@ public:
     void init();
     void showClientList();
 
-private slots:
-    void on_pushButton_OpenApproval_clicked();
+    QMap<QString, Client *> *getClientList() const;
+    void setClientList(QMap<QString, Client *> *value);
 
+private slots:
     void on_pushButton_Refresh_clicked();
     void openApproval();
+    void onDeleteClient();
+
+    void on_pushButton_UpgradeClient_clicked();
 
 private:
     Ui::SecServer *ui;

@@ -1,11 +1,12 @@
 #ifndef SECCLIENT_H
 #define SECCLIENT_H
 
-#include "socketcomm.h"
-#include "authstatus.h"
-
 #include <QWidget>
 #include <QTimer>
+
+#include "socketcomm.h"
+#include "authstatus.h"
+#include "log.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class SecClient; }
@@ -20,6 +21,8 @@ public:
     ~SecClient();
 
     QTimer *mCommTimer;
+
+    void loadStylesheet(const QString &fileName);
     void setServerStatus(SocketComm *sc, AuthStatus *as);
     void runStatusChecking();
 
@@ -37,5 +40,6 @@ private:
     Ui::SecClient *ui;
     SocketComm *sc;
     AuthStatus *as;
+    Log *log;
 };
 #endif // SECCLIENT_H

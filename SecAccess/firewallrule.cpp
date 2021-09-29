@@ -7,6 +7,52 @@ FirewallRule::FirewallRule(QObject *parent) : QObject(parent)
     log->loadConfiguration("logger.ini");
 }
 
+QString FirewallRule::getArgs() const
+{
+    return args;
+}
+
+void FirewallRule::setArgs(const QString &value)
+{
+    args = value;
+}
+
+QString FirewallRule::getTypeName() const
+{
+    return typeName;
+}
+
+void FirewallRule::setTypeName(const QString &value)
+{
+    typeName = value;
+}
+
+QString FirewallRule::getRuleName() const
+{
+    return ruleName;
+}
+
+void FirewallRule::setRuleName(const QString &value)
+{
+    ruleName = value;
+}
+
+QString FirewallRule::getClientIP() const
+{
+    return clientIP;
+}
+
+void FirewallRule::setClientIP(const QString &value)
+{
+    clientIP = value;
+}
+
+void FirewallRule::initRule()
+{
+    ruleName = QString("100sec_ip%1%2").arg(clientIP).arg(typeName);
+    disableRule();
+}
+
 QString FirewallRule::execCmd(QString cmd, QString args)
 {
     process->setProgram(cmd);
@@ -23,23 +69,28 @@ QString FirewallRule::execCmd(QString cmd, QString args)
     return cmdlineResult;
 }
 
-void FirewallRule::createRule(QString clientIP)
+void FirewallRule::createRule()
 {
-    QString ruleName = QString("100sec_ip%1").arg(clientIP);
-    QString ruleArgs = QString("netsh advfirewall firewall add rule name=100sec_ip%1 protocol=any dir=in action=allow remoteip=%2").arg(clientIP).arg(clientIP);
+    ruleName = QString("100sec_ip%1%2").arg(clientIP).arg(typeName);
+    QString ruleArgs = QString("netsh advfirewall firewall add rule name=%1 protocol=any dir=in action=allow remoteip=%2 %3")
+            .arg(ruleName).arg(clientIP).arg(args);
     execCmd("cmd", ruleArgs);
 }
 
-void FirewallRule::enableRule(QString ruleName)
+void FirewallRule::enableRule()
 {
     QString ruleArgs = QString("netsh advfirewall firewall set rule name=%1 new enable=yes").arg(ruleName);
     execCmd("cmd", ruleArgs);
 }
 
-void FirewallRule::disableRule(QString ruleName)
+void FirewallRule::disableRule()
 {
     QString ruleArgs = QString("netsh advfirewall firewall set rule name=%1 new enable=no").arg(ruleName);
     execCmd("cmd", ruleArgs);
 }
 
-
+void FirewallRule::deleteRule()
+{
+    QString ruleArgs = QString("netsh advfirewall firewall delete rule name=%1 dir=in").arg(ruleName);
+    execCmd("cmd", ruleArgs);
+}

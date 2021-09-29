@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1195</width>
+    <width>1301</width>
     <height>659</height>
    </rect>
   </property>
@@ -18,10 +18,20 @@
     <rect>
      <x>50</x>
      <y>140</y>
-     <width>1041</width>
+     <width>1171</width>
      <height>271</height>
     </rect>
    </property>
+   <column>
+    <property name="text">
+     <string>选项</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>ID</string>
+    </property>
+   </column>
    <column>
     <property name="text">
      <string>IP地址</string>
@@ -30,6 +40,11 @@
    <column>
     <property name="text">
      <string>MAC地址</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>使用人</string>
     </property>
    </column>
    <column>
@@ -49,6 +64,11 @@
    </column>
    <column>
     <property name="text">
+     <string>版本</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
      <string>操作</string>
     </property>
    </column>
@@ -58,25 +78,9 @@
     <rect>
      <x>50</x>
      <y>450</y>
-     <width>1041</width>
+     <width>1171</width>
      <height>171</height>
     </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton_OpenApproval">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>592</x>
-     <y>90</y>
-     <width>121</width>
-     <height>28</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>审核</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_Clients">
@@ -95,14 +99,27 @@
   <widget class="QPushButton" name="pushButton_Refresh">
    <property name="geometry">
     <rect>
-     <x>410</x>
+     <x>1090</x>
      <y>90</y>
-     <width>93</width>
+     <width>121</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
     <string>刷新</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_UpgradeClient">
+   <property name="geometry">
+    <rect>
+     <x>940</x>
+     <y>90</y>
+     <width>131</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>升级客户端</string>
    </property>
   </widget>
  </widget>

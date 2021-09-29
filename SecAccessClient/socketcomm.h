@@ -1,6 +1,7 @@
 #ifndef SOCKETCOMM_H
 #define SOCKETCOMM_H
 
+#include <QList>
 #include <QObject>
 #include <QTcpSocket>
 

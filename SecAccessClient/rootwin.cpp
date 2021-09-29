@@ -1,8 +1,7 @@
 #include "rootwin.h"
 #include "ui_rootwin.h"
 
-#include <QJsonObject>
-#include <QJsonDocument>
+#include <QDesktopServices>
 
 RootWin::RootWin(QWidget *parent) :
     QWidget(parent),
@@ -18,7 +17,7 @@ RootWin::RootWin(QWidget *parent) :
     //将icon设到QSystemTrayIcon对象中
     mSysTrayIcon->setIcon(icon);
     //当鼠标移动到托盘上的图标时，会显示此处设置的内容
-    mSysTrayIcon->setToolTip(QObject::tr("测试系统托盘图标"));
+    mSysTrayIcon->setToolTip(QObject::tr("Sec Client"));
     connect(mSysTrayIcon,SIGNAL(activated(QSystemTrayIcon::ActivationReason)),this,
             SLOT(on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason)));
     //建立托盘操作的菜单
@@ -30,11 +29,15 @@ RootWin::RootWin(QWidget *parent) :
     sc = new SocketComm;
     connect(sc, SIGNAL(readyToPump(QByteArray)), this, SLOT(OnReceive(QByteArray)));
     as = new AuthStatus;
+    appVersion = 1006;
+
+    log = new Log;
+    log->loadConfiguration("logger.ini");
 
     commWithServer();
 
     isClientOpen = false;
-    on_showClientAction();
+//    on_showClientAction();
 }
 
 RootWin::~RootWin()
@@ -55,7 +58,8 @@ void RootWin::on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason reason)
     case QSystemTrayIcon::DoubleClick:
         //双击托盘图标
         //双击后显示主程序窗口
-        this->show();
+//        this->show();
+        on_showClientAction();
         break;
     default:
         break;
@@ -150,6 +154,9 @@ void RootWin::pingToServer()
     pingMessage.insert("IP", mLocalIP);
     pingMessage.insert("MAC",mLocalMAC);
     pingMessage.insert("AUTH-KEY", as->authKey);
+    pingMessage.insert("AUTH-KEY2", as->devCode);
+    pingMessage.insert("SEC-STATUS", as->isCryptClientRuning());
+    pingMessage.insert("APP-VERSION", appVersion);
     QJsonDocument doc(pingMessage);
     QByteArray bytes = doc.toJson();
 
@@ -161,17 +168,29 @@ void RootWin::OnReceive(QByteArray bytes)
 {
     QJsonParseError err;
     QJsonObject message = QJsonDocument::fromJson(bytes, &err).object();
-    qDebug() << err.errorString();
+    qDebug() << "error:" << err.errorString();
     QString cmd = message.take("CMD").toString();
+//    log->write(Log::TYPE_DEBUG, "RootWin::OnReceive", "command:"+cmd);
     if(cmd == "hello")
     {
         //do nothing
     } else if(cmd == "ping-response") {
-        validAuthorization(bytes);
+        validAuthorization(message);
+    } else if(cmd == "request-for-app-upgrade") {
+//        log->write(Log::TYPE_DEBUG, "RootWin::OnReceive", "command of upgrade is:"+cmd);
+        upgradeApp();
     }
 }
 
-void RootWin::validAuthorization(QByteArray bytes)
+void RootWin::validAuthorization(QJsonObject message)
 {
-    as->setAuthStatus(bytes);
+    as->setAuthStatus(message);
+}
+
+void RootWin::upgradeApp()
+{
+    QString fileLocation = QCoreApplication::applicationDirPath();
+    QString fileUrl = "file:///"+fileLocation+"/updater.exe";
+    log->write(Log::TYPE_DEBUG, "RootWin::upgradeApp", "App run as:"+fileUrl);
+    QDesktopServices::openUrl(QUrl(fileUrl));
 }

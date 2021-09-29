@@ -42,17 +42,18 @@ void AccessApproval::on_pushButton_clicked()
 //    process.waitForFinished();//等待程序关闭
 //    cmdlineResult=QString::fromLocal8Bit(process.readAllStandardOutput()); //程序输出信息
 
-    FirewallRule rule(this);
-    rule.createRule(ip);
+    mClient->userFullName = ui->lineEdit_UserFullName->text();
+    mClient->approveAuthorization();
 
-    if(mClient->authKey.isEmpty())
-    {
-        mClient->authKey = mClient->getRandomString(12);
-    }
-    QString sql = QString("update client set rule_name='%1', auth_status='Yes', auth_key='%3', user_name='%4' where ip='%2'").arg(ruleName).arg(ip).arg(mClient->authKey).arg(ui->lineEdit_UserFullName->text());
-    dbComm->update(sql);
-
-    mClient->registerStatus = "Yes";
+//    FirewallRule rule(this);
+//    rule.createRule(ip);
+//    if(mClient->authKey.isEmpty())
+//    {
+//        mClient->authKey = mClient->getRandomString(12);
+//    }
+//    QString sql = QString("update client set rule_name='%1', auth_status='Yes', auth_key='%3', user_name='%4' where ip='%2'").arg(ruleName).arg(ip).arg(mClient->authKey).arg(mClient->userFullName);
+//    dbComm->update(sql);
+//    mClient->registerStatus = "Yes";
 
 //    mClient->ApprovalResponse(true);
 }

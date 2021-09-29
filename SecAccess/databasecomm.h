@@ -19,6 +19,7 @@ public:
     bool loadConfiguration(QString configPath);
     bool open();
     bool close();
+    bool execute(QString sql);
     bool push(QMap<QString, QString> data);
     bool read(QString sql, int pageSize, QTableWidget *table);
     QList<QMap<QString, QString>> read(QString sql);
@@ -28,8 +29,9 @@ public:
     int getServerPort();
     QString getUserName();
     QString getDBName();
-    void insert(QString tabName, QMap<QString, QString> data);
-    void update(QString sql);
+    bool insert(QString tabName, QMap<QString, QString> data);
+    bool update(QString sql);
+    bool deleteRecord(QString sql);
 
 private:
     QString databaseType;

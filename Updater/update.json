@@ -1,0 +1,25 @@
+{
+	"version":1001,
+	"remoteLocation":"http://192.168.3.93/app",
+	"targetLocation":"tmp",
+	"updaterName":"updater",
+	"fileNum":3,
+	"mainApp":"SecAccessClient.exe",
+	"files": {
+		"updater": {
+			"filename":"updater.exe",
+			"targetName":"updater.new.exe",
+			"version":1001
+		},
+		"update.json": {
+			"filename":"update.json",
+			"targetName":"update.json",
+			"version":1001
+		},
+		"SecAccessClient.exe": {
+			"filename":"SecAccessClient.exe",
+			"targetName":"SecAccessClient.exe",
+			"version":1001
+		}
+	}
+}

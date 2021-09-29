@@ -3,6 +3,7 @@
 
 #include "databasecomm.h"
 #include "log.h"
+#include "firewallrule.h"
 
 #include <QObject>
 #include <QTcpSocket>
@@ -16,6 +17,7 @@ class Client : public QObject
 public:
     explicit Client(QObject *parent = nullptr);
 
+    QString cid;
     QString ip;
     QString mac;
     QString authKey;
@@ -23,19 +25,28 @@ public:
     QString cIP;
     QString cMac;
     QString cAuthKey;
+    QString cDeviceCode;
     QTcpSocket *mSocket;
     DatabaseComm *dbcomm;
     QDateTime lastValidTime;
-    QString ruleName;
     QString cmd;
     QString registerStatus;
     bool ruleEnableStatus;
+    QList<FirewallRule *> *rules;
+    QString userFullName;
+    QString deviceCode;
+    int appVersion;
+    bool cCryptStatus;
 
-    bool isRegistered();
+    QString argR1;
+    QString argR2;
+
+    bool isValid();
+    bool isCrypted();
     bool isAuthoried();
-    bool addAllowRule();
-    bool enableAllowRule();
-    bool disableAllowRule();
+    bool addAllowRules();
+    bool enableAllowRules();
+    bool disableAllowRules();
     void decodeRegister(QJsonObject message);
     void decodePing(QJsonObject message);
     void decodeQueryRegister(QJsonObject message);
@@ -44,6 +55,18 @@ public:
     void pingResponse();
     void ApprovalResponse(bool registerStatus);
     QString getRandomString(int length);
+    bool isClientExist();
+    bool recordNewClient();
+    void approveAuthorization();
+    void removeAuthorization();
+    void updateAuthorization();
+    void init();
+    bool initFirewallRule();
+    void remove();
+    bool requestForUpgrade();
+
+    QTcpSocket *getSocket() const;
+    void setSocket(QTcpSocket *socket);
 
 signals:
     void clientReady(Client *);

@@ -1,8 +1,14 @@
 #ifndef AUTHSTATUS_H
 #define AUTHSTATUS_H
 
+#include "wmiccommand.h"
+#include "windowinfo.h"
+
 #include <QObject>
 #include <QDateTime>
+#include <QList>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 class AuthStatus : public QObject
 {
@@ -16,11 +22,16 @@ public:
     QString serverName;
     int port;
     QString configPath;
+    QString devCode;
+    WMICCommand *wmic;
 
-    void setAuthStatus(QByteArray bytes);
+    void setAuthStatus(QJsonObject message);
     bool isClientAuthoried();
     bool loadConfiguration();
     void setAuthKey(QString authKey);
+    void genDeviceCode();
+    bool isCryptClientRuning();
+    bool isCryptLogin();
 
 signals:
 

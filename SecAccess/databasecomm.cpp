@@ -42,7 +42,7 @@ bool DatabaseComm::loadConfiguration(QString configPath)
 bool DatabaseComm::open()
 {
     QString dbType = "";
-    log->write(Log::TYPE_DEBUG, "DB", databaseType);
+    log->write(Log::TYPE_DEBUG, "DatabaseComm::open", "DB type is:"+databaseType);
     if(databaseType == "mysql") {
         dbType = "QMYSQL";
 
@@ -55,7 +55,7 @@ bool DatabaseComm::open()
 //        log->write(Log::TYPE_DEBUG, "DB", QString("server: %1; port:%2; dbName:%3; user:%4; password:%5").arg(serverName).arg(serverPort).arg(dbName).arg(userName).arg(password));
         if(!db.open()) {
             lastError = QString("Connect to database failed: %1").arg(db.lastError().text());
-//            log->write(Log::TYPE_DEBUG, "DB", lastError);
+            log->write(Log::TYPE_DEBUG, "DatabaseComm::open", "Last error:"+lastError);
             return false;
         }
         else
@@ -63,6 +63,7 @@ bool DatabaseComm::open()
             query = new QSqlQuery(db);
         }
     } else {
+        log->write(Log::TYPE_DEBUG, "DatabaseComm::open", "DB type is not 'mysql', DB will not be opened.");
         return false;
     }
     return true;
@@ -73,9 +74,30 @@ bool DatabaseComm::close() {
     return true;
 }
 
+bool DatabaseComm::execute(QString sql)
+{
+    bool success = false;
+
+    if(!isOpen())
+    {
+        log->write(Log::TYPE_DEBUG, "DatabaseComm::execute", "Database connection is not opened, try reconnection.");
+        if(!open())
+        {
+            log->write(Log::TYPE_DEBUG, "DatabaseComm::execute", "Failed to reconnect to database. Database execution will not be finished.");
+            return false;
+        }
+    }
+
+    success = query->exec(sql);
+
+    if(!success)
+        log->write(Log::TYPE_DEBUG, "DatabaseComm::execute", "database execution failed: "+sql);
+    return success;
+}
+
 bool DatabaseComm::read(QString sql, int pageSize, QTableWidget *table)
 {
-    bool success = query->exec(sql);
+    bool success = execute(sql);
     if(!success)
     {
         lastError = "Fail to read from database.";
@@ -102,10 +124,11 @@ bool DatabaseComm::read(QString sql, int pageSize, QTableWidget *table)
 QList<QMap<QString, QString>>  DatabaseComm::read(QString sql)
 {
     QList<QMap<QString, QString>> result;
-    bool success = query->exec(sql);
+    bool success = execute(sql);
     if(!success)
     {
         lastError = "Fail to read from database.";
+        log->write(Log::TYPE_DEBUG, "DatabaseComm::read", "SQL:"+sql);
         return result;
     }
 
@@ -127,11 +150,14 @@ void DatabaseComm::push(QString tabName, QMap<QString, QString> data)
     insert(tabName, data);
 }
 
-void DatabaseComm::insert(QString tabName, QMap<QString, QString> data)
+bool DatabaseComm::insert(QString tabName, QMap<QString, QString> data)
 {
+    bool retval = false;
     if(data.isEmpty())
-        return;
-
+    {
+        log->write(Log::TYPE_DEBUG, "DatabaseComm::insert", "Data is empty. Map size:"+QString::number(data.size()));
+        return false;
+    }
     QString sql1 = tr("INSERT INTO %1(").arg(tabName);
     QString sql2 = ") VALUES(";
     QMap<QString, QString>::iterator it = data.begin();
@@ -143,21 +169,30 @@ void DatabaseComm::insert(QString tabName, QMap<QString, QString> data)
     sql1 = sql1.left(sql1.size()-2);
     sql2 = sql2.left((sql2.size()-2));
     QString sql = sql1 + sql2 + ")";
+    log->write(Log::TYPE_DEBUG, "DatabaseComm::insert", "SQL:"+sql);
     qDebug() << sql;
-    query->exec(sql);
+    retval = execute(sql);
 
+    return retval;
 }
 
-void DatabaseComm::update(QString sql)
+bool DatabaseComm::update(QString sql)
 {
     qDebug() << sql;
-    query->exec(sql);
+    bool retval = execute(sql);
+    return retval;
 }
 
-bool DatabaseComm::push(QMap<QString, QString> data)
+//bool DatabaseComm::push(QMap<QString, QString> data)
+//{
+//    data.isEmpty();
+//    return false;
+//}
+
+bool DatabaseComm::deleteRecord(QString sql)
 {
-    data.isEmpty();
-    return false;
+    bool retval = execute(sql);
+    return retval;
 }
 
 bool DatabaseComm::isOpen()

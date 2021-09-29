@@ -32,7 +32,7 @@ RootWin::RootWin(QWidget *parent) :
     log->loadConfiguration("logger.ini");
     mServer = new SocketServer;
     mClients = new QMap<QString, Client *>;
-    connect(mServer, SIGNAL(newClient(QTcpSocket *)), this, SLOT(addNewClient(QTcpSocket *)));
+    connect(mServer, SIGNAL(newClient(QTcpSocket *)), this, SLOT(addNewClientConnection(QTcpSocket *)));
 
     dbComm = new DatabaseComm;
     dbComm->loadConfiguration("mysql.ini");
@@ -68,7 +68,8 @@ void RootWin::on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason reason)
     case QSystemTrayIcon::DoubleClick:
         //双击托盘图标
         //双击后显示主程序窗口
-        this->show();
+//        this->show();
+        on_showServerAction();
         break;
     default:
         break;
@@ -122,7 +123,7 @@ void RootWin::on_showServerAction()
     connect(w, SIGNAL(destroyed()),this,SLOT(setServerClosed()));
 
     w->dbcomm = this->dbComm;
-    w->clientList = mClients;
+    w->setClientList(mClients);
     w->init();
 
     w->show();
@@ -142,24 +143,29 @@ void RootWin::getClientsFromDB()
 {
     FirewallRule rule(this);
 
-    QString sql = "select ip, mac, auth_status, auth_key,rule_name, user_name from client where ip <> ''";
+    QString sql = "select cid, ip, mac, auth_status, auth_key,rule_name, user_name, device_code from client where ip <> ''";
     QList<QMap<QString, QString>> clientList = dbComm->read(sql);
     for(int i=0; i<clientList.size(); i++)
     {
         QMap<QString, QString> clientRecord = clientList.at(i);
         Client *c = new Client;
         c->dbcomm = dbComm;
+        c->cid = clientRecord.value("cid");
         c->ip = clientRecord.value("ip");
         c->mac = clientRecord.value("mac");
+        c->userFullName = clientRecord.value("user_name");
         c->authKey = clientRecord.value("auth_key");
+        c->deviceCode = clientRecord.value("device_code");
+//        c->appVersion = clientRecord.value("app_version").toInt();
         c->registerStatus = clientRecord.value("auth_status");
-
-        c->cIP = c->ip;
-        c->cMac = c->mac;
+        //client connection IP is automatically set to ip stored in database.
+//        c->cIP = c->ip;
+//        c->cMac = c->mac;
+        //init firewall rule object.
+        if(c->registerStatus == "Yes")
+            c->init();
 
         mClients->insert(clientRecord.value("ip"), c);
-
-        rule.disableRule(QString("100sec_ip%1").arg(c->cIP));
     }
 }
 
@@ -169,25 +175,7 @@ void RootWin::validAuthorization()
     while(it != mClients->end())
     {
         Client *c = it.value();
-        QString ruleName = QString("100sec_ip%1").arg(c->cIP);
-        FirewallRule rule(this);
-        log->write(Log::TYPE_DEBUG, "Root Win", ruleName);
-        if(c->isAuthoried())
-        {
-            if(!c->ruleEnableStatus)
-            {
-                rule.enableRule(ruleName);
-                c->ruleEnableStatus = true;
-                log->write(Log::TYPE_DEBUG, "Root Win", ruleName + " enabled");
-            }
-        } else {
-            if(c->ruleEnableStatus)
-            {
-                rule.disableRule(ruleName);
-                c->ruleEnableStatus = false;
-                log->write(Log::TYPE_DEBUG, "Root Win", ruleName + " disabled");
-            }
-        }
+        c->updateAuthorization();
         it++;
     }
 }
@@ -199,41 +187,35 @@ void RootWin::monitorClient()
     connect(mCommTimer,SIGNAL(timeout()),this,SLOT(validAuthorization()));
 }
 
-void RootWin::addNewClient(QTcpSocket *client)
+void RootWin::addNewClientConnection(QTcpSocket *client)
 {
     QString cIP = client->peerAddress().toString();
     Client *c;
     if(mClients->contains(cIP))
     {
         c = mClients->value(cIP);
+        c->cIP = cIP;
     } else {
         c = new Client;
         c->dbcomm = dbComm;
         c->cIP = cIP;
-//        mClients->insert(cIP, c);
     }
-    c->mSocket = client;
+    c->setSocket(client);
 
-    connect(client, SIGNAL(readyRead()), c, SLOT(onReceive()));
+//    connect(client, SIGNAL(readyRead()), c, SLOT(onReceive()));
     connect(c, SIGNAL(clientReady(Client *)), this, SLOT(handleClientMessage(Client *)));
 }
 
 void RootWin::handleClientMessage(Client *c)
 {
-    log->write(Log::TYPE_DEBUG, "Root Win", c->cmd);
+    log->write(Log::TYPE_DEBUG, "Root Win::handleClientMessage", c->cmd);
     if(c->cmd == "register")
     {
-        recordNewClient(c);
-    } else if(c->cmd == "ping")
-    {
-        c->pingResponse();
-    } else if(c->cmd == "query-register-status") {
-        log->write(Log::TYPE_DEBUG, "Root Win", c->cIP);
-        bool result = c->registerStatus == "Yes"?true:false;
-        c->ApprovalResponse(result);
+        mClients->insert(c->cIP, c);
     }
 }
 
+//not use anymore
 void RootWin::recordNewClient(Client *c)
 {
     if(!isClientExist(c))
@@ -249,6 +231,7 @@ void RootWin::recordNewClient(Client *c)
     }
 }
 
+//not use anymore
 bool RootWin::isClientExist(Client *c)
 {
     QString sql = QString("select ip from client where ip='%1'").arg(c->cIP);

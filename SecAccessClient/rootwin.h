@@ -3,6 +3,7 @@
 
 #include "secclient.h"
 #include "authstatus.h"
+#include "log.h"
 
 #include <QWidget>
 #include <QSystemTrayIcon>
@@ -11,6 +12,8 @@
 //#include <QAction>
 #include <QTimer>
 #include <QDateTime>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 namespace Ui {
 class RootWin;
@@ -36,6 +39,8 @@ public:
     AuthStatus *as;
     QString mLocalIP;
     QString mLocalMAC;
+    int appVersion;
+    Log *log;
 
 protected:
      void closeEvent(QCloseEvent *event);
@@ -47,7 +52,8 @@ private:
     QTimer *mCommTimer;
 
     void commWithServer();
-    void validAuthorization(QByteArray bytes);
+    void validAuthorization(QJsonObject message);
+    void upgradeApp();
 
 private slots:
     void on_activatedSysTrayIcon(QSystemTrayIcon::ActivationReason reason);
